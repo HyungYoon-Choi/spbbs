@@ -11,11 +11,16 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import yoon.spring.bbs.dto.SpDto;
+import yoon.spring.bbs.util.Static;
 
 // db 접근 클래스
 public class SpDao {
 	DataSource dataSource;
+	JdbcTemplate template = null;
 
 	// 생성자에서 DB 접속
 	public SpDao() {
@@ -27,6 +32,8 @@ public class SpDao {
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
+
+		template = Static.template;
 	}
 
 	// 글쓰기
@@ -344,47 +351,50 @@ public class SpDao {
 	// 데이터를 받아서 SpDto에 담음
 	public ArrayList<SpDto> list() {
 
-		ArrayList<SpDto> dtos = new ArrayList<SpDto>();
-
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			conn = dataSource.getConnection();
-			String sql = "select * from spboard order by s_group desc, s_step asc";
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				int num = rs.getInt("num");
-				int s_group = rs.getInt("s_group");
-				int s_step = rs.getInt("s_step");
-				int s_indent = rs.getInt("s_indent");
-				String uname = rs.getString("uname");
-				String upass = rs.getString("upass");
-				String title = rs.getString("title");
-				String content = rs.getString("content");
-				int ct = rs.getInt("ct");
-				int hit = rs.getInt("hit");
-				Timestamp wdate = rs.getTimestamp("wdate");
-
-				SpDto dto = new SpDto(num, s_group, s_step, s_indent, uname, upass, title, content, ct, hit, wdate);
-				dtos.add(dto);
-			}
-		} catch (Exception ee) {
-			ee.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception eee) {
-			}
-		}
-		return dtos;
+		String sql = "select * from spboard order by s_group desc, s_step asc";
+		return (ArrayList<SpDto>) template.query(sql, new BeanPropertyRowMapper<SpDto>(SpDto.class));
+//
+//		ArrayList<SpDto> dtos = new ArrayList<SpDto>();
+//
+//		Connection conn = null;
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
+//		try {
+//			conn = dataSource.getConnection();
+//			String sql = "select * from spboard order by s_group desc, s_step asc";
+//			pstmt = conn.prepareStatement(sql);
+//			rs = pstmt.executeQuery();
+//
+//			while (rs.next()) {
+//				int num = rs.getInt("num");
+//				int s_group = rs.getInt("s_group");
+//				int s_step = rs.getInt("s_step");
+//				int s_indent = rs.getInt("s_indent");
+//				String uname = rs.getString("uname");
+//				String upass = rs.getString("upass");
+//				String title = rs.getString("title");
+//				String content = rs.getString("content");
+//				int ct = rs.getInt("ct");
+//				int hit = rs.getInt("hit");
+//				Timestamp wdate = rs.getTimestamp("wdate");
+//
+//				SpDto dto = new SpDto(num, s_group, s_step, s_indent, uname, upass, title, content, ct, hit, wdate);
+//				dtos.add(dto);
+//			}
+//		} catch (Exception ee) {
+//			ee.printStackTrace();
+//		} finally {
+//			try {
+//				if (rs != null)
+//					rs.close();
+//				if (pstmt != null)
+//					pstmt.close();
+//				if (conn != null)
+//					conn.close();
+//			} catch (Exception eee) {
+//			}
+//		}
+//		return dtos;
 	}
 
 	private void hitAdd(int num) {
