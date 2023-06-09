@@ -1,0 +1,103 @@
+@charset "UTF-8";
+
+* {
+	box-sizing: border-box
+}
+
+body {
+	font-size: 16px;
+	color: #000;
+	font-family: 'Gowun Dodum', sans-serif;
+	/*font-family: 'Noto Sans KR', sans-serif;*/
+}
+
+a, a:link {
+	color: #000;
+}
+
+table.bbsList {
+	width: 100%;
+	border-bottom: 2px solid #333;
+	margin-bottom: 40px;
+}
+
+.bbsList th {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-top: 1px solid #999;
+	border-bottom: 2px solid #999;
+	text-align: center;
+	position: relative;
+}
+
+.bbsList th:not(:last-child)::after {
+	content: "";
+	display: block;
+	width: 1px;
+	height: 15px;
+	top: 15px;
+	right: 0;
+	background: #999;
+	position: absolute;
+}
+
+.bbsList td {
+	padding: 15px;
+	border-bottom: 1px solid #999;
+}
+
+.bbsList td.title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipis;
+}
+
+.button-group {
+	display: inline-block;
+	float: right;
+}
+
+.button-group a.btn {
+	margin-left: 10px;
+	margin-right: 10px;
+	color: #fff;
+}
+
+.button-group a.btn:last-child {
+	margin-right: 0;
+}
+/*본문*/
+.detail ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	margin-top: 30px;
+	display: flex;
+	justify-content: flex-start;
+}
+
+.detail li {
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #999;
+}
+
+.detail label {
+	display: inline-block;
+	padding: 10px 20px;
+	margin-right: 30px;
+	margin-left: 30px;
+	background: #ddd;
+	margin-bottom: 0;
+}
+
+.detail .col-md-4:first-child label {
+	margin-left: 0;
+}
+
+.detail .col-md-4:first-child label {
+	margin-left: 0px;
+}
+
+.detailview img {
+	max-width: 100%;
+}
