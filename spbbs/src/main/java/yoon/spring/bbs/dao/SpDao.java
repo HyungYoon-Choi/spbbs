@@ -3,7 +3,7 @@ package yoon.spring.bbs.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.naming.Context;
@@ -11,8 +11,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 
 import yoon.spring.bbs.dto.SpDto;
 import yoon.spring.bbs.util.Static;
@@ -21,6 +24,12 @@ import yoon.spring.bbs.util.Static;
 public class SpDao {
 	DataSource dataSource;
 	JdbcTemplate template = null;
+	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	// 생성자에서 DB 접속
 	public SpDao() {
@@ -38,78 +47,54 @@ public class SpDao {
 
 	// 글쓰기
 	public void write(String uname, String upass, String title, String content) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 
-		try {
-			conn = dataSource.getConnection();
-			String sql = "insert into spboard(uname, upass, title, content) value(?, ?, ?, ?)";
-			pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			pstmt.setString(1, uname);
-			pstmt.setString(2, upass);
-			pstmt.setString(3, title);
-			pstmt.setString(4, content);
+		template.update(new PreparedStatementCreator() {
 
-			pstmt.executeUpdate();
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 
-			rs = pstmt.getGeneratedKeys(); // 쿼리 실행 후 생성된 키 값 반환
-			pstmt.clearParameters(); // pstmt 다시 사용을 위해 비움
+				String sql = "insert into spboard(uname, upass, title, content) value(?, ?, ?, ?)";
+				PreparedStatement pstmt = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+				pstmt.setString(1, uname);
+				pstmt.setString(2, upass);
+				pstmt.setString(3, title);
+				pstmt.setString(4, content);
+				pstmt.executeUpdate();
+				ResultSet rs = pstmt.getGeneratedKeys();
 
-			if (rs.next()) {
-				int num = rs.getInt(1);
-				try {
-
-					String query = "update spboard set s_group = ? where num = ?";
-					pstmt = conn.prepareStatement(query);
-					pstmt.setInt(1, num);
-					pstmt.setInt(2, num);
-					pstmt.executeUpdate();
-
-				} catch (Exception ee) {
+				if (rs.next()) {
+					groupUpdate(rs.getInt(1));
 				}
+				return pstmt;
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception eee) {
-			}
-		}
+		});
 	}
 
 	// 글삭제
 	// 글 삭제하기
 	public void delete(String cNum) {
 		int iNum = Integer.parseInt(cNum);
-		Connection conn = null;
-		PreparedStatement pstmt = null;
+		String sql = "delete from spboard where num = ?";
+		template.update(sql, new PreparedStatementSetter() {
 
-		try {
-			conn = dataSource.getConnection();
-			String sql = "delete from spboard where num = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, iNum);
-			pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception ee) {
-
+			@Override
+			public void setValues(PreparedStatement ps) throws SQLException {
+				ps.setInt(1, iNum);
 			}
-		}
+		});
+
+	}
+
+	private void groupUpdate(int num) {
+		String sql = "update spboard set s_group = ? where num = ?";
+		template.update(sql, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement pstmt) throws SQLException {
+				pstmt.setInt(1, num);
+				pstmt.setInt(2, num);
+			}
+		});
 	}
 
 	// 답글쓰기
@@ -149,9 +134,9 @@ public class SpDao {
 				if (rs != null)
 					rs.close();
 				if (pstmt != null)
-					rs.close();
+					pstmt.close();
 				if (conn != null)
-					rs.close();
+					conn.close();
 			} catch (Exception ee) {
 
 			}
@@ -246,7 +231,15 @@ public class SpDao {
 
 	public void updateok(String num, String uname, String upass, String title, String content) {
 
-		int inum = Integer.parseInt(num);
+		int inum = 0;
+		if (num != null && !num.isEmpty()) {
+			inum = Integer.parseInt(num);
+		} else {
+			// Handle the case where num is empty or null
+			// You might want to throw an exception or return from the function
+			System.out.println("Error: num string is empty or null");
+			return;
+		}
 		String sql = "update spboard set uname=?, upass=?, title=?, content=? where num = ?";
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -302,56 +295,20 @@ public class SpDao {
 
 		int iNum = Integer.parseInt(cNum);
 		hitAdd(iNum); // 조회수 증가
+		String sql = "select * from spboard where num = " + iNum;
+		return template.queryForObject(sql, new BeanPropertyRowMapper<SpDto>(SpDto.class));
 
-		SpDto dto = null;
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-
-		try {
-			conn = dataSource.getConnection();
-			String sql = "select * from spboard where num = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, iNum);
-			rs = pstmt.executeQuery();
-
-			// dto에 담는 작업
-			if (rs.next()) {
-				int num = rs.getInt("num");
-				int s_group = rs.getInt("s_group");
-				int s_step = rs.getInt("s_step");
-				int s_indent = rs.getInt("s_indent");
-				String uname = rs.getString("uname");
-				String upass = rs.getString("upass");
-				String title = rs.getString("title");
-				String content = rs.getString("content");
-				int ct = rs.getInt("ct");
-				int hit = rs.getInt("hit");
-				Timestamp wdate = rs.getTimestamp("wdate");
-
-				dto = new SpDto(num, s_group, s_step, s_indent, uname, upass, title, content, ct, hit, wdate);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception eee) {
-			}
-		}
-
-		return dto;
 	}
 
 	// 데이터를 받아서 SpDto에 담음
-	public ArrayList<SpDto> list() {
+	public ArrayList<SpDto> list(String pg) {
 
-		String sql = "select * from spboard order by s_group desc, s_step asc";
+		int listCount = 15;
+		int page = Integer.parseInt(pg);
+		int min = (page - 1) * listCount;
+		String limit = " limit " + min + " , " + listCount;
+
+		String sql = "select * from spboard order by s_group desc, s_step asc" + limit;
 		return (ArrayList<SpDto>) template.query(sql, new BeanPropertyRowMapper<SpDto>(SpDto.class));
 //
 //		ArrayList<SpDto> dtos = new ArrayList<SpDto>();
@@ -397,27 +354,29 @@ public class SpDao {
 //		return dtos;
 	}
 
-	private void hitAdd(int num) {
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		try {
-			conn = dataSource.getConnection();
-			String sql = "update spboard set hit = hit + 1 where num = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, num);
-			int r = pstmt.executeUpdate();
-			System.out.println("hit업데이트 :" + r);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception ee) {
-			}
+	public int totalRecord() {
+		String sql = "select count(*) from spboard";
+		return template.queryForObject(sql, Integer.class);
+	}
 
-		}
+	public int totalRecord(String where) {
+		String sql = "select count(*) from spboard where 1 and" + where;
+		return template.queryForObject(sql, Integer.class);
+	}
+
+	// 문장보기 hit 업데이트
+	private void hitAdd(int num) {
+
+		String sql = "update spboard set hit = hit + 1 where num = ?";
+		template.update(sql, new PreparedStatementSetter() {
+
+			@Override
+			public void setValues(PreparedStatement ps) throws SQLException {
+
+				ps.setInt(1, num);
+
+			}
+		});
+
 	}
 }

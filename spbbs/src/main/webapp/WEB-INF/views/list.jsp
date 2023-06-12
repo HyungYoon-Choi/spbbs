@@ -54,27 +54,24 @@
 		<div class="row">
 			<div class="offset-md-3 col-md-6">
 				<ul class="pagination justify-content-center">
-					<li class="page-item disabled">
-						<a href="#" class="page-link">이전</a>
-					</li>
-					<li class="page-item active">
-						<a href="#" class="page-link">1</a>
-					</li>
-					<li class="page-item">
-						<a href="#" class="page-link">2</a>
-					</li>
-					<li class="page-item">
-						<a href="#" class="page-link">3</a>
-					</li>
-					<li class="page-item">
-						<a href="#" class="page-link">다음</a>
-					</li>
+
+					<c:if test="${pages.prev }">
+						<li class="page-item disabled"><a href="#" class="page-link">이전</a></li>
+					</c:if>
+
+					<c:forEach begin="${pages.startPage }" end="${pages.endPage }" var="idx">
+						<li class="page-item active"><a href="#" class="page-link">1</a></li>
+					</c:forEach>
+
+					<c:if test="${pages.next && pages.endPage > 0 }">
+						<li class="page-item"><a href="#" class="page-link">다음</a></li>
+					</c:if>
+					
 				</ul>
 			</div>
 			<div class="col-md-3">
 				<div class="button-group">
-					<a href="list" class="btn btn-primary">목록보기</a>
-					<a href="write" class="btn btn-primary">글쓰기</a>
+					<a href="list" class="btn btn-primary">목록보기</a> <a href="write" class="btn btn-primary">글쓰기</a>
 				</div>
 			</div>
 		</div>

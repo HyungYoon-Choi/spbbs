@@ -18,6 +18,8 @@ import yoon.spring.bbs.command.SpReplyokCommand;
 import yoon.spring.bbs.command.SpUpdateCommand;
 import yoon.spring.bbs.command.SpUpdateokCommand;
 import yoon.spring.bbs.command.SpWriteCommand;
+import yoon.spring.bbs.dto.PageDto;
+import yoon.spring.bbs.util.Pagination;
 import yoon.spring.bbs.util.Static;
 
 @Controller
@@ -36,11 +38,17 @@ public class SpController {
 	}
 
 	@RequestMapping("/list")
-	public String list(Model model) {
+	public String list(HttpServletRequest request, Model model) {
 		System.out.println("list()½ÇÇà");
-
+		model.addAttribute("request", request);
 		command = new SpListCommand();
 		command.execute(model);
+
+		PageDto pdto = new PageDto();
+		Pagination pages = new Pagination();
+		pages.setTotalCount();
+		pages.setPdto(pdto);
+		model.addAttribute("pages", pages);
 
 		return "list";
 	}
