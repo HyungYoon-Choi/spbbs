@@ -13,7 +13,7 @@
 <body>
 	<h1 class="text-center m-5">MY SPBBS</h1>
 	<div class="container">
-		<form class="row was-validated" name="write_form" action="writeok" method="post">
+		<form class="row was-validated" name="write_form" action="replyok" method="post">
 			<div class="col-md-6">
 				<label>이름</label>
 				<input type="text" name="uname" class="form-control" placeholder="이름" required />

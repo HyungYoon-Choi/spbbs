@@ -7,10 +7,6 @@ public class PageDto {
 	private int rowEnd;
 	private int pageStart;
 
-	public void setPageStart(int pageStart) {
-		this.pageStart = pageStart;
-	}
-
 	public PageDto() {
 		this.page = 1;
 		this.perPageNum = 10;
@@ -20,20 +16,20 @@ public class PageDto {
 		return page;
 	}
 
-	public void setPageStart() {
-		this.pageStart = (this.page - 1) * perPageNum;
-	}
-
-	public int getPageStart() {
-		return pageStart;
-	}
-
 	public void setPage(int page) {
 		if (page <= 0) {
 			this.page = 1;
 			return;
 		}
 		this.page = page;
+	}
+
+	public void setPageStart() {
+		this.pageStart = (this.page - 1) * perPageNum;
+	}
+
+	public int getPageStart() {
+		return pageStart;
 	}
 
 	public int getPerPageNum() {
@@ -52,7 +48,7 @@ public class PageDto {
 		return rowStart;
 	}
 
-	public void setRowStart(int rowStart) {
+	public void setRowStart() {
 		this.rowStart = ((page - 1) * perPageNum) + 1;
 	}
 
@@ -60,7 +56,7 @@ public class PageDto {
 		return rowEnd;
 	}
 
-	public void setRowEnd(int rowEnd) {
+	public void setRowEnd() {
 		this.rowEnd = rowStart + perPageNum - 1;
 	}
 

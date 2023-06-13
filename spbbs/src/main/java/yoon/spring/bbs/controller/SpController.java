@@ -46,8 +46,9 @@ public class SpController {
 
 		PageDto pdto = new PageDto();
 		Pagination pages = new Pagination();
-		pages.setTotalCount();
 		pages.setPdto(pdto);
+		pages.setDisplayPageNum(10);
+		pages.setTotalCount();
 		model.addAttribute("pages", pages);
 
 		return "list";
@@ -66,7 +67,7 @@ public class SpController {
 
 	@RequestMapping("/write")
 	public String write(Model model) {
-		System.out.println("write");
+		System.out.println("write()");
 		return "write";
 	}
 
@@ -116,7 +117,7 @@ public class SpController {
 
 	@RequestMapping(value = "/updateok", method = RequestMethod.POST)
 	public String updateok(HttpServletRequest request, Model model) {
-		System.out.println("update()");
+		System.out.println("updateok()");
 
 		model.addAttribute("request", request);
 		command = new SpUpdateokCommand();
@@ -125,7 +126,7 @@ public class SpController {
 		return "redirect:list";
 	}
 
-	@RequestMapping(value = "/del", method = RequestMethod.GET)
+	@RequestMapping(value = "/del")
 	public String delete(HttpServletRequest request, Model model) {
 		System.out.println("delete()");
 

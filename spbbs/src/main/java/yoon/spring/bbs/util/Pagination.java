@@ -14,7 +14,16 @@ public class Pagination {
 	private boolean prev;
 	private boolean next;
 	private int displayPageNum;
+
 	private PageDto pdto;
+
+	public PageDto getPdto() {
+		return pdto;
+	}
+
+	public void setPdto(PageDto pdto) {
+		this.pdto = pdto;
+	}
 
 	public int getTotalCount() {
 		return totalCount;
@@ -23,46 +32,23 @@ public class Pagination {
 	public void setTotalCount() {
 		SpDao dao = new SpDao();
 		this.totalCount = dao.totalRecord();
+		calcData();
 	}
 
 	public int getStartPage() {
 		return startPage;
 	}
 
-	public void setStartPage(int startPage) {
-		startPage = (getEndPage() - getDisplayPageNum()) + 1;
-		this.startPage = startPage;
-	}
-
 	public int getEndPage() {
 		return endPage;
-	}
-
-	public void setEndPage(int endPage) {
-		endPage = (int) (Math.ceil(pdto.getPage() / (double) getDisplayPageNum()) * getDisplayPageNum());
-		int tempPage = (int) (Math.ceil(getTotalCount() / (double) pdto.getPerPageNum()));
-		if (endPage > tempPage) {
-			this.endPage = tempPage;
-		} else {
-			this.endPage = endPage;
-		}
-		this.endPage = endPage;
 	}
 
 	public boolean isPrev() {
 		return prev;
 	}
 
-	public void setPrev(boolean prev) {
-		this.prev = getStartPage() == 1 ? false : true;
-	}
-
 	public boolean isNext() {
 		return next;
-	}
-
-	public void setNext(boolean next) {
-		this.next = getEndPage() * pdto.getPerPageNum() >= getTotalCount() ? false : true;
 	}
 
 	public int getDisplayPageNum() {
@@ -70,26 +56,29 @@ public class Pagination {
 	}
 
 	public void setDisplayPageNum(int displayPageNum) {
+		if (displayPageNum == 0)
+			displayPageNum = 10;
 		this.displayPageNum = displayPageNum;
 	}
 
-	public Pagination() {
+	private void calcData() {
+
+		endPage = (int) (Math.ceil(pdto.getPage() / (double) displayPageNum) * displayPageNum);
+		startPage = (endPage - displayPageNum) + 1;
+
+		int tempPage = (int) (Math.ceil(getTotalCount() / (double) pdto.getPerPageNum()));
+		if (endPage > tempPage) {
+			endPage = tempPage;
+		}
+		prev = startPage == 1 ? false : true;
+		next = endPage * pdto.getPerPageNum() >= getTotalCount() ? false : true;
+
 	}
 
 	public String makeQuery(int page) {
 
 		UriComponents uriComponents = UriComponentsBuilder.newInstance().queryParam("page", page).build();
-
 		return uriComponents.toString();
-
-	}
-
-	public PageDto getPdto() {
-		return pdto;
-	}
-
-	public void setPdto(PageDto pdto) {
-		this.pdto = pdto;
 	}
 
 }

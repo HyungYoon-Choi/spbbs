@@ -14,17 +14,17 @@
 	<h1 class="text-center m-5">MY SPBBS</h1>
 	<div class="container">
 		<form class="row was-validated" name="write_form" action="writeok" method="post">
-			<div class="col-md-6 mt-5">
+			<div class="col-md-6">
 				<label>이름</label>
 				<input type="text" name="uname" class="form-control" placeholder="이름" required />
 				<div class="invalid-feedback">이름을 입력하세요.</div>
 			</div>
-			<div class="col-md-6 mt-5">
+			<div class="col-md-6">
 				<label>비밀번호</label>
 				<input type="password" name="upass" class="form-control" placeholder="비밀번호" required />
 				<div class="invalid-feedback">비밀번호을 입력하세요.</div>
 			</div>
-			<div class="col-md-12  mt-5">
+			<div class="col-md-12">
 				<label>제목</label>
 				<input type="text" name="title" class="form-control" placeholder="제목" required />
 				<div class="invalid-feedback">제목을 입력하세요.</div>
